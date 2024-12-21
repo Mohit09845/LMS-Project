@@ -8,10 +8,8 @@ import { generateToken } from '../utils/generateToken.js';
 export const register = asyncHandler(async (req, res) => {
     const { name, email, password } = req.body;
 
-    if ([name, email, password].some((field) =>
-        field?.trim() === "")
-    ) {
-        throw new ApiError(400, "All fields are required")
+    if (!name || !email || !password || [name, email, password].some((field) => field.trim() === "")) {
+        throw new ApiError(400, "All fields are required");
     }
 
     const user = await User.findOne({ email });
@@ -33,14 +31,14 @@ export const register = asyncHandler(async (req, res) => {
     }
 
     return res.status(201).json(
-        new ApiResponse(200, "User registered successfully")
+        new ApiResponse(201,createdUser,"User registered successfully")
     )
 })
 
 export const login = asyncHandler(async (req, res) => {
     const { email, password } = req.body;
 
-    if ([email, password].some((field) =>
+    if (!password || !email || [email, password].some((field) =>
         field?.trim() === "")
     ) {
         throw new ApiError(400, "All fields are required")
@@ -61,8 +59,8 @@ export const login = asyncHandler(async (req, res) => {
     generateToken(res, user, `Welcome back ${user.name}`);
 
     return res
-    .status(200)
-    .json(
-        new ApiResponse(200,"User logged in successfully")
-    )
+        .status(200)
+        .json(
+            new ApiResponse(200, user,"User logged in successfully")
+        )
 })
