@@ -5,7 +5,8 @@ import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger, } from "@/components/ui/tabs"
 import { useLoginUserMutation, useRegisterUserMutation } from "@/features/api/authApi"
 import { Loader2 } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import { toast } from "sonner"
 
 const Login = () => {
     const [loginInput, setLoginInput] = useState({
@@ -53,8 +54,34 @@ const Login = () => {
         await action(inputData);
     }
 
+    useEffect(() => {
+        if (registerIsSuccess && registerData) {
+            toast.success(registerData.message || "Signup successful");
+        }
+
+        if (registerError) {
+            toast.error(registerError?.data?.message || "Signup failed");
+        }
+
+        if (loginError) {
+            toast.error(loginError?.data?.message || "Login failed");
+        }
+
+        if (loginIsSuccess && loginData) {
+            toast.success(loginData.message || "Login successful");
+        }
+    }, [
+        loginIsLoading,
+        registerIsLoading,
+        registerData,
+        loginData,
+        loginError,
+        registerError
+    ]);
+
+
     return (
-        <div className="w-full flex items-center justify-center">
+        <div className="w-full flex items-center justify-center mt-20">
             <Tabs defaultValue="signup" className="w-[400px]">
                 <TabsList className="grid w-full grid-cols-2">
                     <TabsTrigger value="signup">Signup</TabsTrigger>

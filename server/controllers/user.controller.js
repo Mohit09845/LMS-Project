@@ -58,9 +58,4 @@ export const login = asyncHandler(async (req, res) => {
 
     generateToken(res, user, `Welcome back ${user.name}`);
 
-    return res
-        .status(200)
-        .json(
-            new ApiResponse(200, user,"User logged in successfully")
-        )
 })
