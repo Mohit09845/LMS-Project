@@ -4,6 +4,7 @@ import { asyncHandler } from '../utils/asyncHandler.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
 import { ApiError } from '../utils/ApiError.js'
 import { generateToken } from '../utils/generateToken.js';
+import { deleteMediafromCloudinary, uploadMedia } from '../utils/Cloudinary.js';
 
 export const register = asyncHandler(async (req, res) => {
     const { name, email, password } = req.body;
@@ -31,7 +32,7 @@ export const register = asyncHandler(async (req, res) => {
     }
 
     return res.status(201).json(
-        new ApiResponse(201,createdUser,"User registered successfully")
+        new ApiResponse(201, createdUser, "User registered successfully")
     )
 })
 
@@ -58,4 +59,60 @@ export const login = asyncHandler(async (req, res) => {
 
     generateToken(res, user, `Welcome back ${user.name}`);
 
+})
+
+export const logout = asyncHandler(async (_, res) => {
+    const options = {
+        httpOnly: true,
+        secure: true,
+        maxAge: 0
+    }
+    return res.status(200).clearCookie("token", options,).json(
+        new ApiResponse(200, "User Logged out Successfully")
+    )
+})
+
+export const getUserProfile = asyncHandler(async (req, res) => {
+    if (!req.user) {
+        throw new ApiError(404, "User profile not found");
+    }
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(200, req.user, "Profile fetched successfully")
+        )
+})
+
+export const updateProfile = asyncHandler(async (req, res) => {
+    const { name } = req.body;
+    const profilePhotoPath = req.file?.path;
+
+    if (!profilePhotoPath || !req.file.mimetype.startsWith('image/')) {
+        throw new ApiError(400, "Invalid file or file is missing")
+    }
+
+    if (req.user.photoUrl) {
+        const publicId = req.user.photoUrl.split('/').pop().split('.')[0];
+        deleteMediafromCloudinary(publicId);
+    }
+
+    const cloudResponse = await uploadMedia(profilePhotoPath);
+    const photoUrl = cloudResponse.secure_url;
+
+    const user = await User.findByIdAndUpdate(
+        req.user?._id,
+        {
+            $set : {
+                name,
+                photoUrl
+            }
+        },{new: true}
+    ).select('-password')
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(200, user, "Profile updated successfully")
+        )
 })

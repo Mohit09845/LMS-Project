@@ -1,6 +1,6 @@
 import { ApiError } from '../utils/ApiError.js';
 
-const errorHandler = (err, req, res, next) => {
+const errorHandler = (err, _, res, next) => {
     if (res.headersSent) {
         return next(err);
     }
