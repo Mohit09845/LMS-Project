@@ -7,10 +7,11 @@ import { Label } from '@/components/ui/label'
 import { Loader2 } from 'lucide-react'
 import Course from './Course'
 import { useLoadUserQuery, useUpdateUserMutation } from '@/features/api/authApi'
+import { toast } from "sonner"
 
 const Profile = () => {
 
-  const { data, isLoading } = useLoadUserQuery();
+  const { data, isLoading, refetch } = useLoadUserQuery();
 
   const [name, setName] = useState('');
   const [profilePhoto, setProfilePhoto] = useState('');
@@ -22,7 +23,6 @@ const Profile = () => {
     if (file) setProfilePhoto(file);
   }
 
-  console.log("Profile data:", data);
 
   const user = data?.data;
 
@@ -37,12 +37,17 @@ const Profile = () => {
 
   useEffect(() => {
     if (isSuccess) {
+      refetch();
       toast.success(updatedUserData?.message || 'Profile Updated')
     }
-    if (isError) {
+    if (updateError) {
       toast.error(updateError?.message || 'Failed to update Profile')
     }
   }, [updateError, updatedUserData, isSuccess])
+
+  useEffect(() => {
+    refetch();
+  },[])
 
   if (isLoading) {
     return (
@@ -147,7 +152,7 @@ const Profile = () => {
               <DialogFooter>
                 <Button disabled={updatedUserIsLoading} onClick={updateUserHandler}>
                   {
-                    isLoading ? (
+                    updatedUserIsLoading ? (
                       <>
                         <Loader2 className='mr-2 h-4 w-4 animate-spin' />Please wait
                       </>
