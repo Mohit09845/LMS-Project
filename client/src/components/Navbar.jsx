@@ -29,7 +29,6 @@ import { useSelector } from 'react-redux';
 
 const Navbar = () => {
     const { user } = useSelector(store => store.auth);
-    console.log(user);
     const [logoutUser, { data: logoutData, isSuccess }] = useLogoutUserMutation();
     const navigate = useNavigate();
 
