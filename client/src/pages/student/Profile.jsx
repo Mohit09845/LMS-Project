@@ -47,7 +47,7 @@ const Profile = () => {
 
   useEffect(() => {
     refetch();
-  },[])
+  },[isSuccess])
 
   if (isLoading) {
     return (

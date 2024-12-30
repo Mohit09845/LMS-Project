@@ -3,36 +3,39 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarImage } from '@radix-ui/react-avatar'
 import React from 'react'
+import { Link } from 'react-router-dom'
 
-const Course = () => {
+const Course = ({course}) => {
   return (
+    <Link to={`course-detail/${course._id}`}>
     <Card className = 'overflow-hidden rounded-lg dark:bg-gray-800 bg-white shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300'>
         <div className='relative'>
             <img 
-            src='https://wesbos.com/static/6fc098b677ab95df899a42e40b7b3aa4/6d71a/node-facebook-share.jpg'
+            src={course.courseThumbnail}
             className='w-full h-36 object-cover rounded-t-lg'
-            alt='Nodejs.jpg'
+            alt='course.jpg'
             />
         </div>
         <CardContent className = 'px-4 py-4 space-y-2'>
-            <h1 className='hover:underline font-bold text-lg truncate'>Nextjs Complete Course in Hindi</h1>
+            <h1 className='hover:underline font-bold text-lg truncate'>{course.CourseTitle}</h1>
             <div className='flex items-center justify-between'>
             <div className='flex items-center gap-3 '>
                 <Avatar className='h-8 w-8'>
-                    <AvatarImage className='rounded-full' src='https://github.com/shadcn.png' alt='@shadcn'/>
+                    <AvatarImage className='rounded-full' src={course.creator?.photoUrl} alt='creator.jpg'/>
                     <AvatarFallback>CN</AvatarFallback>
                 </Avatar>
-                <h1 className='font-medium text-sm'>Mohit Sharma</h1>
+                <h1 className='font-medium text-sm'>{course.creator?.name}</h1>
             </div>
             <Badge className={'bg-green-500 text-white px-2 py-1 text-xs rounded-full'}>
-                Advance
+                {course.courseLevel}
             </Badge>
             </div>
             <div className='text-lg font-bold'>
-                <span>₹1999</span>
+                <span>{`₹${course.coursePrice}`}</span>
                 </div>   
         </CardContent>
     </Card>
+    </Link>
   )
 }
 

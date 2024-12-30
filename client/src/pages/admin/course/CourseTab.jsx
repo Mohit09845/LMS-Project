@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectItem, SelectLabel, SelectTrigger, SelectGroup, SelectValue, SelectContent } from '@/components/ui/select'
-import { useEditCourseMutation, useGetCourseByIdQuery } from '@/features/api/courseApi'
+import { useEditCourseMutation, useGetCourseByIdQuery, usePublishCourseMutation } from '@/features/api/courseApi'
 import { Loader2 } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -16,9 +16,9 @@ const CourseTab = () => {
     const courseId = params.courseId;
 
     const [editCourse, { data, isLoading, isSuccess, error }] = useEditCourseMutation();
-    const { data: courseByIdData, isLoading: courseByIdLoading } = useGetCourseByIdQuery(courseId,{refetchOnMountOrArgChange: true});
+    const { data: courseByIdData, isLoading: courseByIdLoading, refetch } = useGetCourseByIdQuery(courseId, { refetchOnMountOrArgChange: true });
+    const [publishCourse] = usePublishCourseMutation();
 
-    const isPublished = false;
     const navigate = useNavigate();
 
     const [input, setInput] = useState({
@@ -91,7 +91,20 @@ const CourseTab = () => {
         } catch (err) {
             toast.error(err.message || 'Unexpected error occurred');
         }
-    };    
+    };
+
+    const publishStatusHandler = async (action) => {
+        try {
+            const res = await publishCourse({ courseId, query: action });
+            refetch();
+            if (res.data) {
+                toast.success(res?.data.data)
+            }
+        } catch (error) {
+            console.log(error)
+            toast.error('Failed to publish or unpublish')
+        }
+    }
 
     useEffect(() => {
         if (isSuccess) {
@@ -102,7 +115,7 @@ const CourseTab = () => {
         }
     }, [isSuccess, error])
 
-    if(courseByIdLoading){
+    if (courseByIdLoading) {
         return <Loader2 className='h-4 w-4 animate-spin' />
     }
 
@@ -116,9 +129,9 @@ const CourseTab = () => {
                     </CardDescription>
                 </div>
                 <div className='space-x-2'>
-                    <Button variant='outline'>
+                    <Button variant='outline' onClick={() => publishStatusHandler(course.isPublished ? 'false' : 'true')} disabled={course.lectures.length === 0}>
                         {
-                            isPublished ? 'Unpublish' : 'Publish'
+                            course.isPublished ? 'Unpublish' : 'Publish'
                         }
                     </Button>
                     <Button>
@@ -217,7 +230,7 @@ const CourseTab = () => {
                     }
                 </div>
                 <div className='flex items-center gap-3 mt-3'>
-                    <Button variant='outline' onClick={() => navigate('/admin/course')}>Cancel</Button>
+                    <Button variant='outline' onClick={() => navigate('/admin/course')}>Back</Button>
                     <Button disabled={isLoading} onClick={updateCourseHandler}>
                         {
                             isLoading ? (

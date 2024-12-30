@@ -11,6 +11,9 @@ import AddCourse from './pages/admin/course/AddCourse'
 import CourseTable from './pages/admin/course/CourseTable'
 import EditCourse from './pages/admin/course/EditCourse'
 import { CreateLecture } from './pages/admin/Lecture/CreateLecture'
+import EditLecture from './pages/admin/Lecture/EditLecture'
+import CourseDetail from './pages/student/CourseDetail'
+import CourseProgress from './pages/student/CourseProgress'
 
 const appRouter = createBrowserRouter([
   {
@@ -39,6 +42,14 @@ const appRouter = createBrowserRouter([
         element: <Profile/>
       },
       {
+        path: 'course-detail/:courseId',
+        element: <CourseDetail/>
+      },
+      {
+        path: 'course-progress/:courseId',
+        element: <CourseProgress/>
+      },
+      {
         path: 'admin',
         element: <SideBar/>,
         children: [
@@ -61,6 +72,10 @@ const appRouter = createBrowserRouter([
           {
             path: 'course/:courseId/lecture',
             element: <CreateLecture/>
+          },
+          {
+            path: 'course/:courseId/lecture/:lectureId',
+            element: <EditLecture/>
           }
         ]
       }

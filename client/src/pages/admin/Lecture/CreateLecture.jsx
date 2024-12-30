@@ -18,7 +18,7 @@ export const CreateLecture = () => {
 
     const [createLecture, { data: lectureData, isLoading, isSuccess, error }] = useCreateLectureMutation();
 
-    const { getCourseLecture, data: courseLectureData, isLoading: lectureLoading, isError: lectureError,refetch } = useGetCourseLectureQuery(courseId);
+    const { getCourseLecture, data: courseLectureData, isLoading: lectureLoading, isError: lectureError, refetch } = useGetCourseLectureQuery(courseId);
 
     const createLectureHandler = async () => {
         await createLecture({ courseId, lectureTitle })
@@ -65,12 +65,17 @@ export const CreateLecture = () => {
                 </div>
                 <div className='mt-10'>
                     {
-                        lectureLoading ? <p>loading lectures...</p> :
-                            lectureError ? <p>Failed to load lectures.</p> :
-                                courseLectureData.lectures.length === 0 ? <p>No lectures are available at this moment.</p> :
-                                    courseLectureData.lectures.map((lecture, index) => (
-                                        <Lecture key={lecture._id} lecture={lecture} index={index} courseId = {courseId}/>
-                                    ))
+                        lectureLoading ? (
+                            <p>Loading lectures...</p>
+                        ) : lectureError ? (
+                            <p>Failed to load lectures.</p>
+                        ) : !courseLectureData?.data?.lectures || courseLectureData.data.lectures.length === 0 ? (
+                            <p>No lectures are available at this moment.</p>
+                        ) : (
+                            courseLectureData.data.lectures.map((lecture, index) => (
+                                <Lecture key={lecture._id} lecture={lecture} index={index} courseId={courseId} />
+                            ))
+                        )
                     }
                 </div>
             </div>
