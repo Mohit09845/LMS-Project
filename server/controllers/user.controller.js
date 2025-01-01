@@ -73,14 +73,23 @@ export const logout = asyncHandler(async (_, res) => {
 })
 
 export const getUserProfile = asyncHandler(async (req, res) => {
-    if (!req.user) {
+
+    const userId = req.user?._id;
+
+    if (!userId) {
         throw new ApiError(404, "User profile not found");
+    }
+
+    const user = await User.findById(userId).select('-password').populate('enrolledCourses')
+
+    if(!user){
+        throw new ApiError(404, "User not found");
     }
 
     return res
         .status(200)
         .json(
-            new ApiResponse(200, req.user, "Profile fetched successfully")
+            new ApiResponse(200, user, "Profile fetched successfully")
         )
 })
 
