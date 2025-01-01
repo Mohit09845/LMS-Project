@@ -21,8 +21,6 @@ const CourseDetail = () => {
     const {data,isLoading,isError} = useGetCourseDetailWithStatusQuery(courseId);
     const navigate = useNavigate();
 
-    console.log(data);
-
     if(isLoading) return <h1>Loading...</h1>
     if(isError) return <h1>Failed to load course details</h1>
 

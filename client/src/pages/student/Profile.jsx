@@ -18,6 +18,7 @@ const Profile = () => {
 
   const [updateUser, { data: updatedUserData, isLoading: updatedUserIsLoading, error: updateError, isSuccess }] = useUpdateUserMutation();
 
+
   const onChangeHandler = (e) => {
     const file = e.target.files?.[0];
     if (file) setProfilePhoto(file);
@@ -170,7 +171,7 @@ const Profile = () => {
         <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 my-4'>
           {
             user.enrolledCourses?.length === 0 ? <h1>You have not enrolled in any course.</h1> : (
-              user.enrolledCourses.map((course) => <Course key={course.id} />)
+              user.enrolledCourses.map((course) => <Course key={course._id} course={course} />)
             )
           }
         </div>

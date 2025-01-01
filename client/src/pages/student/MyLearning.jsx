@@ -1,9 +1,11 @@
 import React from 'react'
 import Course from './Course';
-import { useGetPublishedCourseQuery } from '@/features/api/courseApi';
+import { useLoadUserQuery } from '@/features/api/authApi';
 
 const MyLearning = () => {
-    const { data: coursesData, isLoading, isSuccess, isError } = useGetPublishedCourseQuery();
+    const { data: coursesData, isLoading, isError } = useLoadUserQuery();
+
+    const myLearning = coursesData?.data.enrolledCourses || [];
 
     if (isError) {
         return <h1>Some error occured while fetching courses</h1>
@@ -14,10 +16,10 @@ const MyLearning = () => {
             <h1 className='font-bold text-2xl'>My Learning</h1>
             <div className='my-5'>
                 {
-                    isLoading ? (<MyLearningSkeleton />) : coursesData?.data.length === 0 ? (<p>You are not enrolled in any course</p>)
+                    isLoading ? (<MyLearningSkeleton />) : myLearning.length === 0 ? (<p>You are not enrolled in any course</p>)
                         : <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4'>
                             {
-                                coursesData?.data && coursesData?.data.map((course, index) => <Course key={index} course={course} />)
+                                coursesData?.data && myLearning.map((course, index) => <Course key={index} course={course} />)
                             }
                         </div>
                 }
