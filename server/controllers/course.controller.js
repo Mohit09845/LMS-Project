@@ -25,34 +25,34 @@ export const createCourse = asyncHandler(async (req, res) => {
         );
 });
 
-export const searchCourse = asyncHandler(async(req,res)=>{
-    const {query = '',categories =[],sortByPrice = ''} = req.query;
-    
+export const searchCourse = asyncHandler(async (req, res) => {
+    const { query = '', categories = [], sortByPrice = '' } = req.query;
+
     const searchCriteria = {
         isPublished: true,
         $or: [
-            {courseTitle: {$regex:query,$options: 'i'}},
-            {coursesubTitle: {$regex:query,$options: 'i'}},
-            {category: {$regex:query,$options: 'i'}}
+            { courseTitle: { $regex: query, $options: 'i' } },
+            { coursesubTitle: { $regex: query, $options: 'i' } },
+            { category: { $regex: query, $options: 'i' } }
         ]
     }
 
-    if(categories.length > 0){
-        searchCriteria.category = {$in: categories}
+    if (categories.length > 0) {
+        searchCriteria.category = { $in: categories }
     }
 
     const sortOptions = {};
 
-    if(sortByPrice === 'low'){
+    if (sortByPrice === 'low') {
         sortOptions.coursePrice = 1;
-    } else if(sortByPrice === 'high'){
+    } else if (sortByPrice === 'high') {
         sortOptions.coursePrice = -1;
     }
 
-    let courses = await Course.find(searchCriteria).populate({path: 'creator',select: 'name photoUrl'}).sort(sortOptions);
+    let courses = await Course.find(searchCriteria).populate({ path: 'creator', select: 'name photoUrl' }).sort(sortOptions);
 
     return res.status(200).json(
-        new ApiResponse(200,courses || [],"Courses fetched")
+        new ApiResponse(200, courses || [], "Courses fetched")
     )
 
 })
@@ -68,7 +68,7 @@ export const getPublishedCourse = asyncHandler(async (_, res) => {
     }
 
     return res.status(200).json(
-        new ApiResponse(200, courses,"Courses fetched successfully")
+        new ApiResponse(200, courses, "Courses fetched successfully")
     )
 })
 
@@ -132,6 +132,46 @@ export const editCourse = asyncHandler(async (req, res) => {
             new ApiResponse(200, course, 'Course updated Successfully')
         );
 });
+
+export const deleteCourse = asyncHandler(async (req, res) => {
+    const { courseId } = req.params;
+
+    if (!isValidObjectId(courseId)) {
+        throw new ApiError(400, 'Invalid Course ID');
+    }
+
+    const course = await Course.findById(courseId);
+
+    if (!course) {
+        throw new ApiError(404, 'Course not found');
+    }
+
+    if (course.courseThumbnail) {
+        const publicId = course.courseThumbnail.split('/').pop().split('.')[0];
+        await deleteMediafromCloudinary(publicId).catch(err => {
+            console.error(`Failed to delete thumbnail: ${err.message}`);
+        });
+    }
+
+    if (course.lectures && course.lectures.length > 0) {
+        for (const lectureId of course.lectures) {
+            const lecture = await Lecture.findById(lectureId);
+            if (lecture && lecture.publicId) {
+                await deleteVideofromCloudinary(lecture.publicId).catch(err => {
+                    console.error(`Failed to delete video for lecture ${lectureId}: ${err.message}`);
+                });
+            }
+        }
+    }
+
+    await Lecture.deleteMany({ _id: { $in: course.lectures } });
+
+    await Course.findByIdAndDelete(courseId);
+
+    return res.status(200).json(
+        new ApiResponse(200, 'Course deleted successfully')
+    )
+})
 
 export const getCourseById = asyncHandler(async (req, res) => {
     const { courseId } = req.params;
