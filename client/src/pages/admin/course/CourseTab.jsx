@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectItem, SelectLabel, SelectTrigger, SelectGroup, SelectValue, SelectContent } from '@/components/ui/select'
-import { useEditCourseMutation, useGetCourseByIdQuery, usePublishCourseMutation } from '@/features/api/courseApi'
+import { useEditCourseMutation, useGetCourseByIdQuery, usePublishCourseMutation, useRemoveCourseMutation } from '@/features/api/courseApi'
 import { Loader2 } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -16,6 +16,7 @@ const CourseTab = () => {
     const courseId = params.courseId;
 
     const [editCourse, { data, isLoading, isSuccess, error }] = useEditCourseMutation();
+    const [removeCourse,{data: removeCourseData,isSuccess: removeSuccess,isLoading: removeCourseLoading,isError: removeCourseError}] = useRemoveCourseMutation();
     const { data: courseByIdData, isLoading: courseByIdLoading, refetch } = useGetCourseByIdQuery(courseId, { refetchOnMountOrArgChange: true });
     const [publishCourse] = usePublishCourseMutation();
 
@@ -93,6 +94,12 @@ const CourseTab = () => {
         }
     };
 
+    const removeCourseHandler = async()=>{
+        if(window.confirm('Are you sure you want to remove this course')){
+            await removeCourse(courseId);
+        }
+    }
+
     const publishStatusHandler = async (action) => {
         try {
             const res = await publishCourse({ courseId, query: action });
@@ -115,6 +122,15 @@ const CourseTab = () => {
         }
     }, [isSuccess, error])
 
+    useEffect(()=>{
+        if(removeSuccess){
+            toast.success(removeCourseData?.data || 'Course removed successfully')
+        }
+        if(removeCourseError){
+            toast.error('Error during deleteing course')
+        }
+    },[removeSuccess,removeCourseData,removeCourseError])
+
     if (courseByIdLoading) {
         return <Loader2 className='h-4 w-4 animate-spin' />
     }
@@ -134,8 +150,13 @@ const CourseTab = () => {
                             course.isPublished ? 'Unpublish' : 'Publish'
                         }
                     </Button>
-                    <Button>
-                        Remove Course
+                    <Button onClick={removeCourseHandler} disabled={removeCourseLoading}>
+                        {
+                            removeCourseLoading ? 
+                            <>
+                                <Loader2 className='h-4 w-4 animate-spin mr-2'/> Please wait
+                            </> : 'Remove Course'
+                        } 
                     </Button>
                 </div>
             </CardHeader>

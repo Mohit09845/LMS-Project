@@ -25,7 +25,7 @@ const LectureTab = () => {
 
     const [EditLecture, { data: EditLectureData, isLoading, isSuccess, error }] = useEditLectureMutation();
     const [removeLecture, { data: removeLectureData, isLoading: removeIsLoading, isSuccess: removeIsSuccess }] = useRemoveLectureMutation();
-    const { getLectureById, data: getData, isSuccess: getSuccess, isError: getError } = useGetLectureByIdQuery(lectureId);
+    const { data: getData, isSuccess: getSuccess, isError: getError } = useGetLectureByIdQuery(lectureId);
 
     const editLectureHandler = async () => {
         await EditLecture({ courseId, lectureId, lectureTitle, videoInfo: uploadVideoInfo, isPreviewFree: isFree })
